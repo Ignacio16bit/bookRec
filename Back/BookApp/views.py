@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from .services.book_api import id_books
+from .services.book_api import id_books, get_books_by_subjects
+
 # Create your views here.
+
 class BookView(APIView):
     def get(self, request):
         query = request.query_params.get('q')
@@ -14,13 +16,34 @@ class BookView(APIView):
                 status = status.HTTP_400_BAD_REQUEST
             )
 
-        result = id_books(query)
-        print(f'Libro devuelto: {result}')
+        print("\n Buscando libro por título...")
+        print(f"   → Consulta: '{query}'")
 
-        if not result:
+        data = id_books(query)
+
+        docs = data.get('docs',[])
+        if not docs:
             return Response(
                 {'error':'Libro no encontrado'},
                 status = status.HTTP_404_NOT_FOUND
             )
-        
-        return Response(result, status=status.HTTP_200_OK)
+        book = docs[0]
+
+        print(f'Libro devuelto: {book}')
+
+        subjects = book.get('subject',[])
+        print(f"   → Total de temas: {len(subjects)}")
+        print(f"   → Lista de temas: {subjects}")
+
+        if not subjects:
+            print('No hay temas asociados al libro')
+
+        candidates = get_books_by_subjects(subjects)
+
+        return Response(
+            {
+                'input_book': book,
+                'candidates':candidates
+            },
+            status=status.HTTP_200_OK
+        )
