@@ -49,6 +49,9 @@ class BookView(APIView):
         #Extraer las listas de géneros para no pasar diccionarios
         candidates_subjects = [book.get('subject', []) for book in candidates]
 
+        candidate_books = [book.get('title', []) for book in candidates]
+        print(f'Libros con temas coincidentes: {candidate_books}')
+
         sim = vectorizer(target_subjects, candidates_subjects)
 
         if sim is None:
@@ -59,4 +62,6 @@ class BookView(APIView):
 
         #Formateado de datos
 
-        return candidates_subjects
+        return Response(
+            sim[2]
+        )

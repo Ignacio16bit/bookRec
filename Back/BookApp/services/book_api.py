@@ -38,7 +38,7 @@ def id_books(query):
 
             if len(subject)>=3:
                 return book
-            elif:
+            else:
                 return None
 
     except requests.exceptions.RequestException as e:
