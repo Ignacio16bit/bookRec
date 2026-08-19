@@ -32,6 +32,7 @@ class BookView(APIView):
         print(f'Libro devuelto: {book}')
 
         subjects = book.get('subject',[])
+        subjects = subjects[:10] #Limito a 10 para reducir carga en
         print(f"   → Total de temas: {len(subjects)}")
         print(f"   → Lista de temas: {subjects}")
 
