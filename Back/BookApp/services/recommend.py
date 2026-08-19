@@ -42,7 +42,7 @@ def vectorizer(target, candidates):
         return None
 
     if not candidates or len(candidates) ==0:
-        print('No se  encontraron libros para comparar. Pruebe de nuevo')
+        print('No se  encontraron libros para comparar.')
         return None
 
     norm_target = normalize(target)

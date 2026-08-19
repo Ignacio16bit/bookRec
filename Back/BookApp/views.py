@@ -5,8 +5,6 @@ from rest_framework.views import APIView
 from .services.book_api import id_books, get_books_by_subjects
 from .services.recommend import vectorizer
 
-# Create your views here.
-
 class BookView(APIView):
     def get(self, request):
         query = request.query_params.get('q')
@@ -18,7 +16,7 @@ class BookView(APIView):
             )
 
         print("\n Buscando libro por título...")
-        print(f"Consulta: '{query}'")
+        print(f"- Consulta: '{query}'")
 
         target_book = id_books(query)
  
@@ -28,7 +26,7 @@ class BookView(APIView):
                 status = status.HTTP_404_NOT_FOUND
             )
 
-        print(f'Libro devuelto: {target_bookbook}')
+        print(f'Libro devuelto: {target_book}')
 
         target_subjects = target_book.get('subject',[])[:10]
         print(f"- Total de temas: {len(target_subjects)}")
@@ -36,7 +34,7 @@ class BookView(APIView):
 
         if not target_subjects:
             return Response(
-                {'error':'No hay temas asociados al libro'},
+                {'error':'No se encontraron obras con los parámetros necesarios. Pruebe con el título en inglés o introduciendo el nombre del autor.'},
                 status = status.HTTP_404_NOT_FOUND
             )
 
@@ -61,4 +59,4 @@ class BookView(APIView):
 
         #Formateado de datos
 
-        return None
+        return candidates_subjects

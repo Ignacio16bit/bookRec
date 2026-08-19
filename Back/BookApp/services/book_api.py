@@ -8,7 +8,7 @@ def id_books(query):
     }
     params={
         'q': query,
-        'limit':1,
+        'limit':5,
         'fields': 'title,key,author_name,subject'
     }
 
@@ -32,7 +32,14 @@ def id_books(query):
             return None
 
         docs = response.json().get('docs',[])
-        return docs[0] if docs else None
+
+        for book in docs:
+            subject = book.get('subject',[])
+
+            if len(subject)>=3:
+                return book
+            elif:
+                return None
 
     except requests.exceptions.RequestException as e:
         print(f'Error en la API: {e}')
