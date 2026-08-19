@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from .services.book_api import id_books, get_books_by_subjects
+from .services.recommend import vectorizer
 
 # Create your views here.
 
@@ -17,34 +18,47 @@ class BookView(APIView):
             )
 
         print("\n Buscando libro por título...")
-        print(f"   → Consulta: '{query}'")
+        print(f"Consulta: '{query}'")
 
-        data = id_books(query)
-
-        docs = data.get('docs',[])
-        if not docs:
+        target_book = id_books(query)
+ 
+        if not target_book:
             return Response(
                 {'error':'Libro no encontrado'},
                 status = status.HTTP_404_NOT_FOUND
             )
-        book = docs[0]
 
-        print(f'Libro devuelto: {book}')
+        print(f'Libro devuelto: {target_bookbook}')
 
-        subjects = book.get('subject',[])
-        subjects = subjects[:10] #Limito a 10 para reducir carga en
-        print(f"   → Total de temas: {len(subjects)}")
-        print(f"   → Lista de temas: {subjects}")
+        target_subjects = target_book.get('subject',[])[:10]
+        print(f"- Total de temas: {len(target_subjects)}")
+        print(f"- Lista de temas: {target_subjects}")
 
-        if not subjects:
-            print('No hay temas asociados al libro')
+        if not target_subjects:
+            return Response(
+                {'error':'No hay temas asociados al libro'},
+                status = status.HTTP_404_NOT_FOUND
+            )
 
-        candidates = get_books_by_subjects(subjects)
+        candidates = get_books_by_subjects(target_subjects)
 
-        return Response(
-            {
-                'input_book': book,
-                'candidates':candidates
-            },
-            status=status.HTTP_200_OK
-        )
+        if not candidates:
+            return Response(
+                {'error': 'No hay libros coincidentes con los temas'},
+                status = status.HTTP_404_NOT_FOUND
+            )
+
+        #Extraer las listas de géneros para no pasar diccionarios
+        candidates_subjects = [book.get('subject', []) for book in candidates]
+
+        sim = vectorizer(target_subjects, candidates_subjects)
+
+        if sim is None:
+            return Response(
+                {'error':'Error al procesar la solicitud'},
+                status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        #Formateado de datos
+
+        return None

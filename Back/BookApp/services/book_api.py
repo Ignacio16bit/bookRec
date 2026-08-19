@@ -9,12 +9,11 @@ def id_books(query):
     params={
         'q': query,
         'limit':1,
-        'fields': 'title,key,author_name,subject',
-        'headers': headers
+        'fields': 'title,key,author_name,subject'
     }
 
     try:
-        response = requests.get(url,params=params, timeout=30)
+        response = requests.get(url,params=params, headers=headers ,timeout=30)
 
         if response.status_code==400:
             print(f'{query}: Datos inválidos para la búsqueda')
@@ -32,8 +31,8 @@ def id_books(query):
             print(f'Error HTTP: {response.status_code}')
             return None
 
-        data = response.json()
-        return data
+        docs = response.json().get('docs',[])
+        return docs[0] if docs else None
 
     except requests.exceptions.RequestException as e:
         print(f'Error en la API: {e}')
@@ -43,7 +42,7 @@ def get_books_by_subjects(subjects):
     if not subjects:
         return None
 
-    subject_query = 'OR'.join(subjects)
+    subject_query = ' OR '.join(subjects)
     query = f'subject:({subject_query})'
     headers = {
         "User-Agent": "BookRec/0.1 (ignaciopux@gmail.com)"
@@ -51,13 +50,12 @@ def get_books_by_subjects(subjects):
     url = settings.OL_URL
     params = {
         'q':query,
-        'limit':10,
-        'fields': 'title,key,author_name,subject',
-        'headers':headers
+        'limit':15,
+        'fields': 'title,key,author_name,subject'
         }
 
     try:
-        response = requests.get(url, params=params, timeout=30)
+        response = requests.get(url, params=params, headers=headers, timeout=30)
 
         if response.status_code==400:
             print(f'{query}: Datos inválidos para la búsqueda')

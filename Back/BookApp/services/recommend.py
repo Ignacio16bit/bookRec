@@ -1,6 +1,27 @@
 #imports
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.metrics.pairwise import cosine_similarity
+import re
+
+#Normalización entrada
+def normalize(subject_list):
+    if not subject_list:
+        return []
+    
+    normalized =[]
+    
+    for item in subject_list:
+        item_str = str(item)
+
+        #Eliminar caracteres y espacios
+        item_str = item_str.lower()
+        item_str = re.sub(r'[^a-z0-9\sáéíóúüñ]','',item_str)
+        item_str= re.sub(r'\s+',' ', item_str).strip()
+        
+        if item_str:
+            normalized.append(item_str)
+
+    return normalized
 
 #Vectorización
 def vectorizer(target, candidates):
@@ -24,23 +45,18 @@ def vectorizer(target, candidates):
         print('No se  encontraron libros para comparar. Pruebe de nuevo')
         return None
 
-    join_list = [target]+candidates
+    norm_target = normalize(target)
+    norm_candidates = [normalize(c) for c in candidates]
+
+    join_list = [norm_target]+norm_candidates
 
     mlb = MultiLabelBinarizer()
     join_binaries = mlb.fit_transform(join_list)
 
-    v_target = joinBinaries[0:1]
-    v_candidates = joinBinaries[1:]
+    v_target = join_binaries[0:1]
+    v_candidates = join_binaries[1:]
 
     similarities = cosine_similarity(v_target, v_candidates)
 
     #Devolverá tantos índices del vector como comparaciones se realicen
-    return similarities
-
-
-#Normalización entrada
-    #Tomar listas como argumentos
-
-    #to lower case
-
-    #devolver las listas normalizadas
+    return similarities [0]
