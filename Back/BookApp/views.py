@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -19,7 +20,7 @@ class BookView(APIView):
         print(f"- Consulta: '{query}'")
 
         target_book = id_books(query)
- 
+
         if not target_book:
             return Response(
                 {'error':'Libro no encontrado'},
@@ -61,7 +62,23 @@ class BookView(APIView):
             )
 
         #Formateado de datos
+        formatted_rec = []
+        for candidate, score in zip(candidates, sim):
+            formatted_rec.append({
+                'title': candidate.get('title', 'Sin título'),
+                'author': candidate.get('author_name'),
+                'cover_id':candidate.get('cover_i'),
+                'similarity':round(float(score),2)
+            })
 
-        return Response(
-            sim[2]
-        )
+        formatted_rec.sort(key=lambda x: x['similarity'], reverse=True)
+
+        return Response({
+            'input_book':{
+                'title':target_book.get('title'),
+                'author':target_book.get('author_name', []),
+                'subjects':target_subjects
+            },
+            'recommendations':formatted_rec,
+            'total': len(formatted_rec)
+        })
